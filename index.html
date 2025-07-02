@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Estudio Prisma - Cotizador</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <div class="container">
+    <!-- Titulo presentación del proposito de la página-->
+    <!-- FALTA LOGOTIPO DE LA EMPRESA E IDENTIDAD-->
+    <h1>Estudio Prisma</h1>
+    <h2>Cotiza con nosotros</h2>
+
+    <!-- Formulario de cotizacion -->
+    <form id="formCotizacion">
+        <label for="nombre">Tu nombre</label>
+        <input type="text" id="nombre" />
+
+        <label for="email">Tu correo electrónico</label>
+        <input type="email" id="email" />
+
+        <label for="servicio">Servicio requerido</label>
+        <!-- Desplegable de los servicios que se ofrecen-->
+        <select id="servicio">
+            <option value="">Selecciona un servicio</option>
+            <option>Diseño de logotipo</option>
+            <option>Branding corporativo</option>
+            <option>Diseño de redes sociales</option>
+            <option>Desarrollo de página web básica</option>
+            <option>Edición de video promocional</option>
+        </select>
+
+        <label for="estilo">Estilo visual deseado</label>
+        <!-- Desplegable de estilos por los que guiarse al cotizar-->
+        <select id="estilo">
+            <option value="">Selecciona un estilo</option>
+            <option>Formal / Corporativo</option>
+            <option>Minimalista</option>
+            <option>Colorido / Infantil</option>
+            <option>Vintage</option>
+            <option>Moderno / Vanguardista</option>
+        </select>
+
+        <!-- Permite enviar texto como comentario-->
+        <!-- FALTA PONER CONTROLES DE INGRESO DE SIMBOLOS-->
+        <label for="comentario">Comentario adicional</label>
+        <textarea id="comentario" rows="3"></textarea>
+
+        <div id="errores" class="error"></div>
+
+        <button type="submit">Solicitar cotización</button>
+    </form>
+
+        <!-- Muestra cotización registradas -->
+        <div class="cotizaciones" id="listaCotizaciones">
+            <h2>Cotizaciones registradas</h2>
+        </div>
+    </div>
+
+    <!-- Vinculación con JavaS -->
+    <script src="script.js"></script>
+</body>
+</html>
