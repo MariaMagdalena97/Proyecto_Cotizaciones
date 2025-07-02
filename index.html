@@ -21,16 +21,15 @@
         <label for="email">Tu correo electrónico</label>
         <input type="email" id="email" />
 
-        <label for="servicio">Servicio requerido</label>
-        <!-- Desplegable de los servicios que se ofrecen-->
-        <select id="servicio">
-            <option value="">Selecciona un servicio</option>
-            <option>Diseño de logotipo</option>
-            <option>Branding corporativo</option>
-            <option>Diseño de redes sociales</option>
-            <option>Desarrollo de página web básica</option>
-            <option>Edición de video promocional</option>
-        </select>
+    <!-- Selección de servicio o servicios requeridos-->
+    <label>Servicios requeridos (puedes seleccionar más de uno)</label>
+        <div id="servicio">
+            <label><input type="checkbox" name="servicio" value="Diseño de logotipo" /> Diseño de logotipo</label><br>
+            <label><input type="checkbox" name="servicio" value="Branding corporativo" /> Branding corporativo</label><br>
+            <label><input type="checkbox" name="servicio" value="Diseño de redes sociales" /> Diseño de redes sociales</label><br>
+            <label><input type="checkbox" name="servicio" value="Desarrollo de página web básica" /> Desarrollo de página web básica</label><br>
+            <label><input type="checkbox" name="servicio" value="Edición de video promocional" /> Edición de video promocional</label>
+        </div>
 
         <label for="estilo">Estilo visual deseado</label>
         <!-- Desplegable de estilos por los que guiarse al cotizar-->
