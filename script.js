@@ -17,9 +17,11 @@ formulario.addEventListener("submit", function (e) {
   // Obtiene valores del formulario (.trim se agrega para evitar errores por elementos vacios)
   const nombre = document.getElementById("nombre").value.trim();
   const email = document.getElementById("email").value.trim();
-  const servicio = document.getElementById("servicio").value;
   const estilo = document.getElementById("estilo").value;
   const comentario = document.getElementById("comentario").value.trim();
+  // Obtiene todos los checkboxes marcados
+  const checkboxes = document.querySelectorAll('input[name="servicio"]:checked');
+  const servicios = Array.from(checkboxes).map(cb => cb.value);
 
   // Guarda los errores para revisar
   let errores = [];
@@ -35,8 +37,8 @@ formulario.addEventListener("submit", function (e) {
     errores.push("El correo electrónico no es válido.");
   }
 
-  if (servicio === "") {
-    errores.push("Debes seleccionar un servicio.");
+  if (servicios.length === 0) {
+  errores.push("Debes seleccionar al menos un servicio.");
   }
 
   if (estilo === "") {
@@ -53,7 +55,7 @@ formulario.addEventListener("submit", function (e) {
   const cotizacion = {
     nombre,
     email,
-    servicio,
+    servicios,
     estilo,
     comentario
   };
@@ -85,7 +87,7 @@ function mostrarCotizaciones() {
     const card = document.createElement("div");
     card.className = "cotizacion";
     card.innerHTML = `
-      <h3>${cot.servicio}</h3>
+      <h3>Servicios: ${cot.servicios.join(", ")}</h3>
       <p><strong>Cliente:</strong> ${cot.nombre}</p>
       <p><strong>Email:</strong> ${cot.email}</p>
       <p><strong>Estilo:</strong> ${cot.estilo}</p>
