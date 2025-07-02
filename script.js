@@ -6,52 +6,26 @@ const listaCotizaciones = document.getElementById("listaCotizaciones");
 // Arreglo para almacenar cotizaciones
 let cotizaciones = [];
 
-// Se agrega un escuchador de eventos. Detecta cuándo el usuario hace clic en "Solicitar cotización".
+// Escuchar el envío del formulario
 formulario.addEventListener("submit", function (e) {
-  // Evita que se recargue la página
   e.preventDefault(); 
-
-  // Limpia errores anteriores
   erroresDiv.innerHTML = "";
 
-  // Obtiene valores del formulario (.trim se agrega para evitar errores por elementos vacios)
+  // Obtener datos del formulario
   const nombre = document.getElementById("nombre").value.trim();
   const email = document.getElementById("email").value.trim();
   const estilo = document.getElementById("estilo").value;
   const comentario = document.getElementById("comentario").value.trim();
-  // Obtiene todos los checkboxes marcados
-  const checkboxes = document.querySelectorAll('input[name="servicio"]:checked');
-  const servicios = Array.from(checkboxes).map(cb => cb.value);
+  const servicios = obtenerServiciosSeleccionados();
 
-  // Guarda los errores para revisar
-  let errores = [];
-
-  // Validaciones
-  if (nombre.length < 2) {
-    // Mensaje de error.
-    errores.push("El nombre debe tener al menos 2 caracteres.");
-  }
-  
-  // Que el email sea detectado como email
-  if (!validarEmail(email)) {
-    errores.push("El correo electrónico no es válido.");
-  }
-
-  if (servicios.length === 0) {
-  errores.push("Debes seleccionar al menos un servicio.");
-  }
-
-  if (estilo === "") {
-    errores.push("Debes seleccionar un estilo visual.");
-  }
-
-  // Si hay errores, se muestran como error y se detiene la ejecución del formulario
+  // Validar y manejar errores
+  const errores = validarFormulario(nombre, email, servicios, estilo, comentario);
   if (errores.length > 0) {
-    erroresDiv.innerHTML = errores.map(err => `<div>${err}</div>`).join("");
+    mostrarErrores(errores);
     return;
   }
 
-  // Crea objeto de cotización
+  // Crear objeto de cotización
   const cotizacion = {
     nombre,
     email,
@@ -60,29 +34,78 @@ formulario.addEventListener("submit", function (e) {
     comentario
   };
 
-  // Agrega al arreglo en la ágina
+  // Guardar y mostrar
   cotizaciones.push(cotizacion);
-
-  // Muestra las cotizaciones en pantalla
+  localStorage.setItem("cotizaciones", JSON.stringify(cotizaciones));
   mostrarCotizaciones();
+  mostrarMensajeExito();
+  limpiarFormulario();
+});
 
-  // Limpia el formulario
+// Función para validar el formulario
+function validarFormulario(nombre, email, servicios, estilo, comentario) {
+  let errores = [];
+
+  if (nombre.length < 2) {
+    errores.push("El nombre debe tener al menos 2 caracteres.");
+  }
+
+  if (!validarEmail(email)) {
+    errores.push("El correo electrónico no es válido.");
+  }
+
+  if (servicios.length === 0) {
+    errores.push("Debes seleccionar al menos un servicio.");
+  }
+
+  if (estilo === "") {
+    errores.push("Debes seleccionar un estilo visual.");
+  }
+
+  const caracteresInvalidos = /[<>/]/;
+  if (caracteresInvalidos.test(comentario)) {
+    errores.push("El comentario no debe contener los símbolos <, > o /");
+  }
+
+  return errores;
+}
+
+// Función para mostrar errores en el DOM
+function mostrarErrores(errores) {
+  erroresDiv.innerHTML = errores.map(err => `<div>${err}</div>`).join("");
+}
+
+// Función para mostrar mensaje de éxito
+function mostrarMensajeExito() {
+  const exitoDiv = document.createElement("div");
+  exitoDiv.className = "exito";
+  exitoDiv.innerText = "¡Cotización enviada con éxito!";
+  formulario.insertAdjacentElement("beforebegin", exitoDiv);
+  setTimeout(() => exitoDiv.remove(), 4000);
+}
+
+// Función para limpiar el formulario
+function limpiarFormulario() {
   formulario.reset();
-}); // fin del preventDefault
+}
 
-// Función para validar formato de correo electrónico
+// Validación básica de formato de email
 function validarEmail(email) {
   const regex = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
   return regex.test(email);
 }
 
-// Función para mostrar las cotizaciones en el DOM
+// Obtener servicios seleccionados (checkbox)
+function obtenerServiciosSeleccionados() {
+  const checkboxes = document.querySelectorAll('input[name="servicio"]:checked');
+  return Array.from(checkboxes).map(cb => cb.value);
+}
+
+// Mostrar cotizaciones guardadas en el DOM
 function mostrarCotizaciones() {
   const div = listaCotizaciones;
   div.innerHTML = `<h2>Cotizaciones registradas</h2>`;
-  
-  // Recorre todas las cotizaciones guardadas, crea un div por cada una, 
-  // muestra su información con HTML y las inserta en el DOM usando appendChild
+
   cotizaciones.forEach((cot) => {
     const card = document.createElement("div");
     card.className = "cotizacion";
@@ -96,4 +119,15 @@ function mostrarCotizaciones() {
     div.appendChild(card);
   });
 }
+
+// Al cargar la página, mostrar cotizaciones guardadas
+window.addEventListener("DOMContentLoaded", () => {
+  const datosGuardados = localStorage.getItem("cotizaciones");
+  if (datosGuardados) {
+    cotizaciones = JSON.parse(datosGuardados);
+    mostrarCotizaciones();
+  }
+});
+
+
 
