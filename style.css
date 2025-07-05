@@ -1,80 +1,456 @@
-/* Estilo general */
-/* FALTA DARLE IDENTIDAD CORPORATIVA */
+/* ==============================================
+   ESTILOS GENERALES Y CONFIGURACIÓN BASE
+   ============================================== */
+
+/* Reset y configuración principal del body */
 body {
     font-family: 'Segoe UI', sans-serif;
-    background-color: #f9f9fb;
+    background: 
+        linear-gradient(rgba(249, 249, 251, 0.85), rgba(249, 249, 251, 0.85)),
+        url('https://images.pexels.com/photos/17486099/pexels-photo-17486099.png?_gl=1*8me3rg*_ga*MTU0NjM2ODY2NC4xNzUxNDg0OTk2*_ga_8JE65Q40S6*czE3NTE0ODQ5OTYkbzEkZzEkdDE3NTE0ODUwOTAkajYwJGwwJGgw');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
     margin: 0;
     padding: 0;
+    max-width: 1200px;
+    margin: 0 auto; /* Simplificado: centra automáticamente */
+    line-height: 1.6; /* Mejora la legibilidad */
 }
 
-/* Contenedor principal con el formulario */
-.container {
-  max-width: 600px;
-  margin: 40px auto;
-  background-color: #fff;
-  padding: 25px;
-  border-radius: 15px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
+/* ==============================================
+   TIPOGRAFÍA Y TÍTULOS
+   ============================================== */
 
-/* Título principal */
-/* REVISAR CAMBIO DE LETRA*/
+/* Título principal - grande y centrado */
 h1 {
-  text-align: center;
-  color: #3a3a5a;
+    text-align: center;
+    color: #3a3a5a;
+    margin-bottom: 20px;
+    font-size: 2.5rem; /* Más responsive que px fijos */
+    font-weight: 600;
 }
 
-/* Etiquetas */
+/* Títulos de sección */
+h2, .section-title {
+    color: #4a4a8a;
+    font-weight: 500; /* Más consistente */
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+}
+
+.section-title {
+    text-align: center;
+    font-weight: bold;
+    margin-top: 30px;
+}
+
+/* ==============================================
+   LAYOUT PRINCIPAL - CONTENEDORES
+   ============================================== */
+
+/* Wrapper principal que contiene todo el contenido */
+.content-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 0 20px; /* Añadido para móviles */
+}
+
+/* Contenedores individuales - formulario y cotizaciones */
+.form-container,
+.quotes-container {
+    background: rgba(255, 255, 255, 0.95); /* Ligeramente transparente */
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px); /* Efecto moderno de blur */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Por defecto las cotizaciones están ocultas */
+.quotes-container {
+    display: none;
+}
+
+/* ==============================================
+   FORMULARIOS - INPUTS Y CONTROLES
+   ============================================== */
+
+/* Etiquetas de campos */
 label {
-  display: block;
-  margin-top: 15px;
-  font-weight: bold;
-  color: #555;
+    display: block;
+    margin-top: 15px;
+    font-weight: 600;
+    color: #555;
+    font-size: 0.95rem;
 }
 
-/* Formato de IMPUT(ingreso de datos), SELECT(menú desplegable), TEXTAREA(caja de comentarios), BUTTON(desplegable) */
-input, select, textarea, button {
-  width: 100%;
-  padding: 10px;
-  margin-top: 5px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 14px;
-}
-
-/* Formato BUTTON(de "Solicitar Cotizacion") */
+/* Estilo base para todos los inputs */
+input,
+select,
+textarea,
 button {
-  background-color: #3a3a5a;
-  color: #fff;
-  margin-top: 20px;
-  cursor: pointer;
-  transition: background 0.3s ease;
+    width: 100%;
+    padding: 12px 16px; /* Más padding para mejor UX */
+    margin-top: 8px;
+    border-radius: 8px;
+    border: 2px solid #e0e0e0; /* Border más grueso */
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: all 0.3s ease; /* Transición suave */
+}
+
+/* Estados de focus para inputs */
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: #4a4a8a;
+    box-shadow: 0 0 0 3px rgba(74, 74, 138, 0.1);
+}
+
+/* Botón principal */
+button {
+    background: linear-gradient(135deg, #3a3a5a 0%, #4a4a8a 100%);
+    color: #fff;
+    margin-top: 20px;
+    cursor: pointer;
+    font-weight: 600;
+    border: none;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 button:hover {
-  background-color: #575777;
+    background: linear-gradient(135deg, #575777 0%, #6a6aaa 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-/* Mensaje de error */
+button:active {
+    transform: translateY(0);
+}
+
+/* ==============================================
+   MENSAJES DE ERROR
+   ============================================== */
+
 .error {
-  color: red;
-  font-size: 13px;
-  margin-top: 4px;
+    color: #e74c3c;
+    font-size: 13px;
+    margin-top: 4px;
+    padding: 8px 12px;
+    background: rgba(231, 76, 60, 0.1);
+    border-radius: 4px;
+    border-left: 3px solid #e74c3c;
 }
 
-/* Cotizaciones */
+/* ==============================================
+   CHECKBOXES - SERVICIOS
+   ============================================== */
+
+/* Contenedor de servicios con checkboxes */
+#servicio label {
+    display: flex;
+    align-items: center;
+    font-weight: 400;
+    font-family: 'Segoe UI', sans-serif; /* Consistente con el resto */
+    font-size: 14px;
+    margin-top: 8px;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
+}
+
+#servicio label:hover {
+    background-color: rgba(74, 74, 138, 0.05);
+}
+
+/* Estilo del checkbox */
+#servicio input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-right: 12px;
+    margin-top: 0;
+    accent-color: #4a4a8a; /* Color moderno para checkboxes */
+}
+
+/* ==============================================
+   COTIZACIONES GUARDADAS
+   ============================================== */
+
 .cotizaciones {
-  margin-top: 30px;
+    margin-top: 30px;
 }
 
 .cotizacion {
-  background: #f0f0f5;
-  padding: 15px;
-  border-radius: 10px;
-  margin-bottom: 15px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    border-left: 4px solid #4a4a8a;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.cotizacion h3 {
-  margin-top: 0;
-  color: #3a3a5a;
+.cotizacion-item,
+.cotizacion-servicios-list li {
+    font-size: 16px;
+    margin-bottom: 8px;
+    color: #333;
 }
+
+.cotizacion-servicios-list {
+    padding-left: 20px;
+    margin: 10px 0;
+    list-style-type: disc;
+}
+
+/* ==============================================
+   GALERÍA LIGHTBOX - MINIATURAS
+   ============================================== */
+
+.lightbox-gallery {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    gap: 20px;
+    padding: 25px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    overflow-x: auto;
+    overflow-y: hidden;
+    margin: 20px auto;
+    width: fit-content;
+    max-width: 100%;
+    /* Scroll personalizado */
+    scrollbar-width: thin;
+    scrollbar-color: #4a4a8a transparent;
+}
+
+/* Webkit scrollbar para Chrome/Safari */
+.lightbox-gallery::-webkit-scrollbar {
+    height: 8px;
+}
+
+.lightbox-gallery::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.lightbox-gallery::-webkit-scrollbar-thumb {
+    background: #4a4a8a;
+    border-radius: 4px;
+}
+
+/* Imágenes de la galería */
+.lightbox-gallery img {
+    width: 180px;
+    height: 180px;
+    flex-shrink: 0;
+    object-fit: cover;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.lightbox-gallery img:hover {
+    transform: scale(1.05) translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* ==============================================
+   MODAL LIGHTBOX - VISTA COMPLETA
+   ============================================== */
+
+.lightbox-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    inset: 0; /* Simplificado: top: 0; left: 0; right: 0; bottom: 0; */
+    background: rgba(0, 0, 0, 0.9);
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+    backdrop-filter: blur(5px);
+}
+
+.lightbox-modal.active {
+    display: flex;
+}
+
+/* Imagen dentro del modal */
+.lightbox-content {
+    max-width: 95vw;
+    max-height: 95vh;
+    object-fit: contain;
+    width: auto;
+    height: auto;
+    animation: zoomIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+    border-radius: 8px;
+}
+
+/* Animación mejorada */
+@keyframes zoomIn {
+    from {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* ==============================================
+   CONTROLES DEL MODAL
+   ============================================== */
+
+/* Botón cerrar */
+.close-button {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+    color: #fff;
+    font-size: 36px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 1002;
+    padding: 10px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    background: rgba(0, 0, 0, 0.5);
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+/* Botones de navegación */
+.prev-button,
+.next-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 60px;
+    height: 60px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1001;
+    transition: all 0.3s ease;
+    user-select: none;
+}
+
+.prev-button {
+    left: 25px;
+}
+
+.next-button {
+    right: 25px;
+}
+
+.prev-button:hover,
+.next-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.6);
+    transform: translateY(-50%) scale(1.1);
+}
+
+/* ==============================================
+   RESPONSIVE DESIGN
+   ============================================== */
+
+/* Tablet */
+@media (max-width: 768px) {
+    .content-wrapper {
+        max-width: 90%;
+        margin: 20px auto;
+    }
+    
+    .lightbox-gallery {
+        gap: 15px;
+        padding: 20px;
+    }
+    
+    .lightbox-gallery img {
+        width: 150px;
+        height: 150px;
+    }
+    
+    h1 {
+        font-size: 2rem;
+    }
+    
+    .prev-button,
+    .next-button {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+}
+
+/* Móvil */
+@media (max-width: 480px) {
+    .content-wrapper {
+        padding: 0 15px;
+    }
+    
+    .form-container,
+    .quotes-container {
+        padding: 20px;
+    }
+    
+    .lightbox-gallery img {
+        width: 120px;
+        height: 120px;
+    }
+    
+    h1 {
+        font-size: 1.5rem;
+    }
+    
+    .close-button {
+        top: 15px;
+        right: 15px;
+        width: 40px;
+        height: 40px;
+        font-size: 28px;
+    }
+    
+    .prev-button,
+    .next-button {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
+    
+    .prev-button {
+        left: 15px;
+    }
+    
+    .next-button {
+        right: 15px;
+    }
+}
+
