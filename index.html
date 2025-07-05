@@ -1,64 +1,77 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Estudio Prisma - Cotizador</title>
-    <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estudio Prisma</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-    <!-- Titulo presentación del proposito de la página-->
-    <!-- FALTA LOGOTIPO DE LA EMPRESA E IDENTIDAD-->
+
     <h1>Estudio Prisma</h1>
-    <h2>Cotiza con nosotros</h2>
 
-    <!-- Formulario de cotizacion -->
-    <form id="formCotizacion">
-        <label for="nombre">Tu nombre</label>
-        <input type="text" id="nombre" />
+    <h2 class="section-title">Servicios que ofrecemos</h2>
+    <div class="lightbox-gallery">
+        <img src="https://media.istockphoto.com/id/2040726024/photo/asian-graphic-designer-working-in-office-designing-logo-artist-creative-designer-illustrator.jpg?s=2048x2048&w=is&k=20&c=9eV3d-3Jauzi1t_0B_cJDBTgO2OdYZ0Pu7wK18AsfkY=" alt="Diseño de Logotipo">
+        <img src="https://media.istockphoto.com/id/2170938088/photo/team-collaborating-on-business-strategy-with-mindmap-and-goal-planning-in-a-modern-office.jpg?s=2048x2048&w=is&k=20&c=tdYtvidU49mu_WG9KYOloF-74iV0E9voe62GFkUIQrs=" alt="Branding Corporativo">
+        <img src="https://media.istockphoto.com/id/1499666574/photo/young-business-woman-watching-live-streaming-people-using-social-media-application-concept.jpg?s=2048x2048&w=is&k=20&c=V4AybvlWIsehqnaPn7q6yvYwWRXqy6fvt4a7AoL1OW4=" alt="Diseño de Redes Sociales">
+        <img src="https://media.istockphoto.com/id/1305999733/photo/web-design-desktop.jpg?s=2048x2048&w=is&k=20&c=GYbe4BRJgWZ4meMdGGbp2kB1qsYN5rWn5YwE0ZQHlWk=" alt="Desarrollo de Página Web de Presentación">
+        <img src="https://media.istockphoto.com/id/1356585971/photo/unrecognizable-guy-editing-astronaut-video.jpg?s=2048x2048&w=is&k=20&c=s8eaDtbYtu4f-2lFkN03tsFUDfh6Snm6S4Zbme7bJgE=" alt="Edición de Video Promocional">
+    </div>
 
-        <label for="email">Tu correo electrónico</label>
-        <input type="email" id="email" />
+    <div id="lightbox-modal" class="lightbox-modal">
+        <span class="close-button">&times;</span>
+        <a class="prev-button">&#10094;</a>
+        <a class="next-button">&#10095;</a>
+        
+        <img class="lightbox-content" id="lightbox-img">
+    </div>
+    <div class="content-wrapper">
+        <div class="form-container">
+            <h2>Cotiza con nosotros</h2>
+            <form id="formCotizacion">
+                <label for="nombre">Nombre Completo:</label>
+                <input type="text" id="nombre" name="nombre" required minlength="3">
 
-    <!-- Selección de servicio o servicios requeridos-->
-    <label>Servicios requeridos (puedes seleccionar más de uno)</label>
-        <div id="servicio">
-            <label><input type="checkbox" name="servicio" value="Diseño de logotipo" /> Diseño de logotipo</label><br>
-            <label><input type="checkbox" name="servicio" value="Branding corporativo" /> Branding corporativo</label><br>
-            <label><input type="checkbox" name="servicio" value="Diseño de redes sociales" /> Diseño de redes sociales</label><br>
-            <label><input type="checkbox" name="servicio" value="Desarrollo de página web básica" /> Desarrollo de página web básica</label><br>
-            <label><input type="checkbox" name="servicio" value="Edición de video promocional" /> Edición de video promocional</label>
+                <label for="email">Correo Electrónico:</label>
+                <input type="email" id="email" name="email" required>
+
+                <label for="servicio">Servicios Deseados:</label>
+                <div id="servicio">
+                    <label><input type="checkbox" name="servicio" value="Diseño de Logotipo"> Diseño de Logotipo</label>
+                    <label><input type="checkbox" name="servicio" value="Branding Corporativo"> Branding Corporativo</label>
+                    <label><input type="checkbox" name="servicio" value="Diseño de Redes Sociales"> Diseño de Redes Sociales</label>
+                    <label><input type="checkbox" name="servicio" value="Desarrollo de Página Web de Presentación"> Desarrollo de Página Web de Presentación</label>
+                    <label><input type="checkbox" name="servicio" value="Edición de Video Promocional"> Edición de Video Promocional</label>
+                </div>
+
+                <label for="estilo">Estilo Visual Preferido:</label>
+                <select id="estilo" name="estilo" required>
+                    <option value="">-- Selecciona un estilo --</option>
+                    <option value="Minimalista">Minimalista</option>
+                    <option value="Moderno">Moderno</option>
+                    <option value="Clásico">Clásico</option>
+                    <option value="Creativo">Creativo</option>
+                    <option value="Corporativo">Corporativo</option>
+                </select>
+
+                <label for="comentario">Comentarios Adicionales:</label>
+                <textarea id="comentario" name="comentario" rows="4"></textarea>
+
+                <div id="errores" class="error" style="display: none;"></div>
+
+                <button type="submit">Solicitar cotización</button>
+            </form>
         </div>
 
-        <label for="estilo">Estilo visual deseado</label>
-        <!-- Desplegable de estilos por los que guiarse al cotizar-->
-        <select id="estilo">
-            <option value="">Selecciona un estilo</option>
-            <option>Formal / Corporativo</option>
-            <option>Minimalista</option>
-            <option>Colorido / Infantil</option>
-            <option>Vintage</option>
-            <option>Moderno / Vanguardista</option>
-        </select>
-
-        <!-- Permite enviar texto como comentario-->
-        <!-- FALTA PONER CONTROLES DE INGRESO DE SIMBOLOS-->
-        <label for="comentario">Comentario adicional</label>
-        <textarea id="comentario" rows="3"></textarea>
-
-        <div id="errores" class="error"></div>
-
-        <button type="submit">Solicitar cotización</button>
-    </form>
-
-        <!-- Muestra cotización registradas -->
-        <div class="cotizaciones" id="listaCotizaciones">
-            <h2>Cotizaciones registradas</h2>
+        <div class="quotes-container">
+            <div id="listaCotizaciones">
+                <h2 class="section-title">Cotizaciones registradas</h2>
+                <p>No hay cotizaciones registradas aún.</p>
+            </div>
         </div>
     </div>
 
-    <!-- Vinculación con JavaS -->
     <script src="script.js"></script>
 </body>
 </html>
