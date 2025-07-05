@@ -1,132 +1,597 @@
-// Referencias al formulario y elementos
-const formulario = document.getElementById("formCotizacion");
-const erroresDiv = document.getElementById("errores");
-const listaCotizaciones = document.getElementById("listaCotizaciones");
+// ============================================
+// SISTEMA DE COTIZACIONES Y GALERÍA LIGHTBOX
+// ============================================
 
-// Arreglo para almacenar cotizaciones
-let cotizaciones = [];
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 Sistema iniciado correctamente');
 
-// Escuchar el envío del formulario
-formulario.addEventListener("submit", function (e) {
-  e.preventDefault(); 
-  erroresDiv.innerHTML = "";
+    // ===========================================
+    // CONFIGURACIÓN Y CONSTANTES
+    // ===========================================
+    
+    const CONFIG = {
+        STORAGE_KEY: 'cotizaciones',
+        MIN_NAME_LENGTH: 3,
+        EMAIL_REGEX: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+        LOCALE: 'es-CL',
+        ANIMATION_DURATION: 300
+    };
 
-  // Obtener datos del formulario
-  const nombre = document.getElementById("nombre").value.trim();
-  const email = document.getElementById("email").value.trim();
-  const estilo = document.getElementById("estilo").value;
-  const comentario = document.getElementById("comentario").value.trim();
-  const servicios = obtenerServiciosSeleccionados();
+    // ===========================================
+    // ELEMENTOS DEL DOM - FORMULARIO
+    // ===========================================
+    
+    const formElements = {
+        form: document.getElementById('formCotizacion'),
+        nombre: document.getElementById('nombre'),
+        email: document.getElementById('email'),
+        estilo: document.getElementById('estilo'),
+        comentario: document.getElementById('comentario'),
+        errores: document.getElementById('errores'),
+        lista: document.getElementById('listaCotizaciones'),
+        container: document.querySelector('.quotes-container')
+    };
 
-  // Validar y manejar errores
-  const errores = validarFormulario(nombre, email, servicios, estilo, comentario);
-  if (errores.length > 0) {
-    mostrarErrores(errores);
-    return;
-  }
+    // ===========================================
+    // ELEMENTOS DEL DOM - LIGHTBOX
+    // ===========================================
+    
+    const lightboxElements = {
+        gallery: document.querySelector('.lightbox-gallery'),
+        modal: document.getElementById('lightbox-modal'),
+        img: document.getElementById('lightbox-img'),
+        closeBtn: document.querySelector('.close-button'),
+        prevBtn: document.querySelector('.prev-button'),
+        nextBtn: document.querySelector('.next-button')
+    };
 
-  // Crear objeto de cotización
-  const cotizacion = {
-    nombre,
-    email,
-    servicios,
-    estilo,
-    comentario
-  };
+    // ===========================================
+    // ESTADO DE LA APLICACIÓN
+    // ===========================================
+    
+    let appState = {
+        currentImageIndex: 0,
+        galleryImages: [],
+        cotizaciones: [],
+        isModalOpen: false
+    };
 
-  // Guardar y mostrar
-  cotizaciones.push(cotizacion);
-  localStorage.setItem("cotizaciones", JSON.stringify(cotizaciones));
-  mostrarCotizaciones();
-  mostrarMensajeExito();
-  limpiarFormulario();
-});
+    // ===========================================
+    // CLASE PRINCIPAL - COTIZADOR
+    // ===========================================
+    
+    class CotizadorApp {
+        constructor() {
+            this.init();
+        }
 
-// Función para validar el formulario
-function validarFormulario(nombre, email, servicios, estilo, comentario) {
-  let errores = [];
+        init() {
+            this.initGallery();
+            this.initForm();
+            this.loadCotizaciones();
+            console.log('✅ Aplicación inicializada');
+        }
 
-  if (nombre.length < 2) {
-    errores.push("El nombre debe tener al menos 2 caracteres.");
-  }
+        // ===============================
+        // INICIALIZACIÓN DE LA GALERÍA
+        // ===============================
+        
+        initGallery() {
+            if (!lightboxElements.gallery) {
+                console.warn('⚠️ Galería no encontrada');
+                return;
+            }
 
-  if (!validarEmail(email)) {
-    errores.push("El correo electrónico no es válido.");
-  }
+            // Obtener todas las imágenes y convertir a array
+            appState.galleryImages = Array.from(lightboxElements.gallery.querySelectorAll('img'));
+            
+            if (appState.galleryImages.length === 0) {
+                console.warn('⚠️ No se encontraron imágenes en la galería');
+                return;
+            }
 
-  if (servicios.length === 0) {
-    errores.push("Debes seleccionar al menos un servicio.");
-  }
+            // Configurar eventos para cada imagen
+            appState.galleryImages.forEach((img, index) => {
+                img.addEventListener('click', () => this.openLightbox(index));
+                img.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        this.openLightbox(index);
+                    }
+                });
+                // Hacer las imágenes accesibles
+                img.setAttribute('tabindex', '0');
+                img.setAttribute('role', 'button');
+                img.setAttribute('aria-label', `Ver imagen ${index + 1} en pantalla completa`);
+            });
 
-  if (estilo === "") {
-    errores.push("Debes seleccionar un estilo visual.");
-  }
+            this.setupLightboxEvents();
+            console.log(`📸 Galería inicializada con ${appState.galleryImages.length} imágenes`);
+        }
 
-  const caracteresInvalidos = /[<>/]/;
-  if (caracteresInvalidos.test(comentario)) {
-    errores.push("El comentario no debe contener los símbolos <, > o /");
-  }
+        // ===============================
+        // CONFIGURACIÓN DE EVENTOS LIGHTBOX
+        // ===============================
+        
+        setupLightboxEvents() {
+            // Botón cerrar
+            lightboxElements.closeBtn?.addEventListener('click', () => this.closeLightbox());
+            
+            // Botones de navegación
+            lightboxElements.prevBtn?.addEventListener('click', () => this.showPrevImage());
+            lightboxElements.nextBtn?.addEventListener('click', () => this.showNextImage());
 
-  return errores;
-}
+            // Cerrar con Escape y navegación con flechas
+            document.addEventListener('keydown', (e) => this.handleKeyboardNav(e));
 
-// Función para mostrar errores en el DOM
-function mostrarErrores(errores) {
-  erroresDiv.innerHTML = errores.map(err => `<div>${err}</div>`).join("");
-}
+            // Cerrar al hacer click fuera de la imagen
+            lightboxElements.modal?.addEventListener('click', (e) => {
+                if (e.target === lightboxElements.modal) {
+                    this.closeLightbox();
+                }
+            });
 
-// Función para mostrar mensaje de éxito
-function mostrarMensajeExito() {
-  const exitoDiv = document.createElement("div");
-  exitoDiv.className = "exito";
-  exitoDiv.innerText = "¡Cotización enviada con éxito!";
-  formulario.insertAdjacentElement("beforebegin", exitoDiv);
-  setTimeout(() => exitoDiv.remove(), 4000);
-}
+            // Evitar cierre accidental en dispositivos táctiles
+            lightboxElements.img?.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        }
 
-// Función para limpiar el formulario
-function limpiarFormulario() {
-  formulario.reset();
-}
+        // ===============================
+        // FUNCIONES DEL LIGHTBOX
+        // ===============================
+        
+        openLightbox(index) {
+            if (index < 0 || index >= appState.galleryImages.length) return;
 
-// Validación básica de formato de email
-function validarEmail(email) {
-  const regex = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-  return regex.test(email);
-}
+            appState.currentImageIndex = index;
+            appState.isModalOpen = true;
 
-// Obtener servicios seleccionados (checkbox)
-function obtenerServiciosSeleccionados() {
-  const checkboxes = document.querySelectorAll('input[name="servicio"]:checked');
-  return Array.from(checkboxes).map(cb => cb.value);
-}
+            const img = appState.galleryImages[index];
+            lightboxElements.img.src = img.src;
+            lightboxElements.img.alt = img.alt || `Imagen ${index + 1}`;
+            
+            // Mostrar modal con animación
+            lightboxElements.modal.style.display = 'flex';
+            lightboxElements.modal.classList.add('active');
+            
+            // Prevenir scroll del body
+            document.body.style.overflow = 'hidden';
+            
+            // Focus en el modal para accesibilidad
+            lightboxElements.modal.focus();
+            
+            console.log(`🖼️ Imagen ${index + 1} abierta en lightbox`);
+        }
 
-// Mostrar cotizaciones guardadas en el DOM
-function mostrarCotizaciones() {
-  const div = listaCotizaciones;
-  div.innerHTML = `<h2>Cotizaciones registradas</h2>`;
+        closeLightbox() {
+            if (!appState.isModalOpen) return;
 
-  cotizaciones.forEach((cot) => {
-    const card = document.createElement("div");
-    card.className = "cotizacion";
-    card.innerHTML = `
-      <h3>Servicios: ${cot.servicios.join(", ")}</h3>
-      <p><strong>Cliente:</strong> ${cot.nombre}</p>
-      <p><strong>Email:</strong> ${cot.email}</p>
-      <p><strong>Estilo:</strong> ${cot.estilo}</p>
-      <p><strong>Comentario:</strong> ${cot.comentario || "—"}</p>
-    `;
-    div.appendChild(card);
-  });
-}
+            appState.isModalOpen = false;
+            lightboxElements.modal.classList.remove('active');
+            
+            // Animación de salida
+            setTimeout(() => {
+                lightboxElements.modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }, CONFIG.ANIMATION_DURATION);
 
-// Al cargar la página, mostrar cotizaciones guardadas
-window.addEventListener("DOMContentLoaded", () => {
-  const datosGuardados = localStorage.getItem("cotizaciones");
-  if (datosGuardados) {
-    cotizaciones = JSON.parse(datosGuardados);
-    mostrarCotizaciones();
-  }
+            console.log('❌ Lightbox cerrado');
+        }
+
+        showNextImage() {
+            if (!appState.isModalOpen) return;
+            
+            const nextIndex = (appState.currentImageIndex + 1) % appState.galleryImages.length;
+            this.openLightbox(nextIndex);
+        }
+
+        showPrevImage() {
+            if (!appState.isModalOpen) return;
+            
+            const prevIndex = (appState.currentImageIndex - 1 + appState.galleryImages.length) % appState.galleryImages.length;
+            this.openLightbox(prevIndex);
+        }
+
+        // ===============================
+        // NAVEGACIÓN CON TECLADO
+        // ===============================
+        
+        handleKeyboardNav(e) {
+            if (!appState.isModalOpen) return;
+
+            switch(e.key) {
+                case 'Escape':
+                    this.closeLightbox();
+                    break;
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    this.showPrevImage();
+                    break;
+                case 'ArrowRight':
+                    e.preventDefault();
+                    this.showNextImage();
+                    break;
+            }
+        }
+
+        // ===============================
+        // INICIALIZACIÓN DEL FORMULARIO
+        // ===============================
+        
+        initForm() {
+            if (!formElements.form) {
+                console.warn('⚠️ Formulario no encontrado');
+                return;
+            }
+
+            formElements.form.addEventListener('submit', (e) => this.handleFormSubmit(e));
+            
+            // Validación en tiempo real
+            formElements.nombre?.addEventListener('blur', () => this.validateField('nombre'));
+            formElements.email?.addEventListener('blur', () => this.validateField('email'));
+            
+            console.log('📝 Formulario inicializado');
+        }
+
+        // ===============================
+        // MANEJO DEL ENVÍO DEL FORMULARIO
+        // ===============================
+        
+        handleFormSubmit(e) {
+            e.preventDefault();
+            
+            const errors = this.validateForm();
+            
+            if (errors.length > 0) {
+                this.showErrors(errors);
+                return;
+            }
+
+            const cotizacion = this.createCotizacion();
+            this.saveCotizacion(cotizacion);
+            this.resetForm();
+            this.showSuccess();
+        }
+
+        // ===============================
+        // VALIDACIÓN DEL FORMULARIO
+        // ===============================
+        
+        validateForm() {
+            const errors = [];
+
+            // Validar nombre
+            const nombre = formElements.nombre?.value.trim();
+            if (!nombre || nombre.length < CONFIG.MIN_NAME_LENGTH) {
+                errors.push(`El nombre debe tener al menos ${CONFIG.MIN_NAME_LENGTH} caracteres.`);
+            }
+
+            // Validar email
+            const email = formElements.email?.value.trim();
+            if (!email || !CONFIG.EMAIL_REGEX.test(email)) {
+                errors.push('El correo electrónico no es válido.');
+            }
+
+            // Validar servicios
+            const servicios = this.getSelectedServices();
+            if (servicios.length === 0) {
+                errors.push('Debes seleccionar al menos un servicio.');
+            }
+
+            // Validar estilo
+            const estilo = formElements.estilo?.value;
+            if (!estilo) {
+                errors.push('Por favor, selecciona un estilo visual.');
+            }
+
+            return errors;
+        }
+
+        // ===============================
+        // VALIDACIÓN DE CAMPO INDIVIDUAL
+        // ===============================
+        
+        validateField(fieldName) {
+            const field = formElements[fieldName];
+            if (!field) return;
+
+            let isValid = true;
+            let message = '';
+
+            switch(fieldName) {
+                case 'nombre':
+                    const nombre = field.value.trim();
+                    isValid = nombre.length >= CONFIG.MIN_NAME_LENGTH;
+                    message = isValid ? '' : `Mínimo ${CONFIG.MIN_NAME_LENGTH} caracteres`;
+                    break;
+                    
+                case 'email':
+                    const email = field.value.trim();
+                    isValid = CONFIG.EMAIL_REGEX.test(email);
+                    message = isValid ? '' : 'Email inválido';
+                    break;
+            }
+
+            // Mostrar/ocultar mensaje de error
+            this.toggleFieldError(field, isValid, message);
+        }
+
+        // ===============================
+        // UTILIDADES DEL FORMULARIO
+        // ===============================
+        
+        getSelectedServices() {
+            const checkboxes = document.querySelectorAll('input[name="servicio"]:checked');
+            return Array.from(checkboxes).map(cb => cb.value);
+        }
+
+        createCotizacion() {
+            return {
+                id: Date.now(), // ID único basado en timestamp
+                nombre: formElements.nombre.value.trim(),
+                email: formElements.email.value.trim(),
+                servicios: this.getSelectedServices(),
+                estilo: formElements.estilo.value,
+                comentario: formElements.comentario.value.trim() || 'Sin comentarios adicionales.',
+                fecha: new Date().toLocaleString(CONFIG.LOCALE, {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                })
+            };
+        }
+
+        // ===============================
+        // MANEJO DE ERRORES Y MENSAJES
+        // ===============================
+        
+        showErrors(errors) {
+            if (!formElements.errores) return;
+
+            formElements.errores.innerHTML = errors.map(error => 
+                `<div class="error-item">⚠️ ${error}</div>`
+            ).join('');
+            
+            formElements.errores.style.display = 'block';
+            formElements.errores.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        toggleFieldError(field, isValid, message) {
+            // Remover clases anteriores
+            field.classList.remove('field-error', 'field-success');
+            
+            // Remover mensaje anterior
+            const existingMessage = field.parentNode.querySelector('.field-message');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+
+            if (message) {
+                // Agregar nueva clase y mensaje
+                field.classList.add(isValid ? 'field-success' : 'field-error');
+                
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `field-message ${isValid ? 'success' : 'error'}`;
+                messageDiv.textContent = message;
+                field.parentNode.insertBefore(messageDiv, field.nextSibling);
+            }
+        }
+
+        showSuccess() {
+            // Crear notificación temporal
+            const notification = document.createElement('div');
+            notification.className = 'success-notification';
+            notification.innerHTML = '✅ ¡Cotización enviada con éxito!';
+            
+            document.body.appendChild(notification);
+            
+            // Animar entrada
+            setTimeout(() => notification.classList.add('show'), 100);
+            
+            // Remover después de 3 segundos
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        resetForm() {
+            formElements.form.reset();
+            formElements.errores.style.display = 'none';
+            formElements.errores.innerHTML = '';
+            
+            // Limpiar mensajes de validación
+            document.querySelectorAll('.field-message').forEach(msg => msg.remove());
+            document.querySelectorAll('.field-error, .field-success').forEach(field => {
+                field.classList.remove('field-error', 'field-success');
+            });
+        }
+
+        // ===============================
+        // GESTIÓN DE COTIZACIONES
+        // ===============================
+        
+        saveCotizacion(cotizacion) {
+            try {
+                const cotizaciones = this.getCotizaciones();
+                cotizaciones.push(cotizacion);
+                localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(cotizaciones));
+                this.displayCotizaciones();
+                
+                console.log('💾 Cotización guardada:', cotizacion.nombre);
+            } catch (error) {
+                console.error('❌ Error al guardar cotización:', error);
+                alert('Error al guardar la cotización. Por favor, intenta nuevamente.');
+            }
+        }
+
+        getCotizaciones() {
+            try {
+                return JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEY)) || [];
+            } catch (error) {
+                console.error('❌ Error al cargar cotizaciones:', error);
+                return [];
+            }
+        }
+
+        loadCotizaciones() {
+            appState.cotizaciones = this.getCotizaciones();
+            this.displayCotizaciones();
+            console.log(`📋 ${appState.cotizaciones.length} cotizaciones cargadas`);
+        }
+
+        displayCotizaciones() {
+            if (!formElements.lista || !formElements.container) return;
+
+            const cotizaciones = this.getCotizaciones();
+            
+            // Limpiar contenido anterior
+            formElements.lista.innerHTML = '<h2 class="section-title">Cotizaciones registradas</h2>';
+
+            if (cotizaciones.length === 0) {
+                formElements.lista.innerHTML += '<p class="no-quotes">📝 No hay cotizaciones registradas aún.</p>';
+                formElements.container.style.display = 'none';
+                return;
+            }
+
+            // Mostrar contenedor y renderizar cotizaciones
+            formElements.container.style.display = 'block';
+            
+            cotizaciones.forEach((cotizacion, index) => {
+                const cotizacionElement = this.createCotizacionElement(cotizacion, index);
+                formElements.lista.appendChild(cotizacionElement);
+            });
+
+            // Configurar botones de eliminar
+            this.setupDeleteButtons();
+        }
+
+        createCotizacionElement(cotizacion, index) {
+            const div = document.createElement('div');
+            div.className = 'cotizacion';
+            div.setAttribute('data-id', cotizacion.id);
+
+            const serviciosList = cotizacion.servicios
+                .map(servicio => `<li>${servicio}</li>`)
+                .join('');
+
+            div.innerHTML = `
+                <div class="cotizacion-header">
+                    <span class="cotizacion-number">#${index + 1}</span>
+                    <span class="cotizacion-date">📅 ${cotizacion.fecha}</span>
+                </div>
+                <div class="cotizacion-body">
+                    <p class="cotizacion-item">
+                        <strong>👤 Cliente:</strong> ${cotizacion.nombre}
+                    </p>
+                    <p class="cotizacion-item">
+                        <strong>📧 Email:</strong> 
+                        <a href="mailto:${cotizacion.email}">${cotizacion.email}</a>
+                    </p>
+                    <div class="cotizacion-item">
+                        <strong>🎨 Servicios:</strong>
+                        <ul class="cotizacion-servicios-list">${serviciosList}</ul>
+                    </div>
+                    <p class="cotizacion-item">
+                        <strong>✨ Estilo:</strong> ${cotizacion.estilo}
+                    </p>
+                    <p class="cotizacion-item">
+                        <strong>💭 Comentario:</strong> ${cotizacion.comentario}
+                    </p>
+                </div>
+                <div class="cotizacion-actions">
+                    <button class="eliminar-cotizacion" data-index="${index}" title="Eliminar cotización">
+                        🗑️ Eliminar
+                    </button>
+                </div>
+            `;
+
+            return div;
+        }
+
+        setupDeleteButtons() {
+            const deleteButtons = document.querySelectorAll('.eliminar-cotizacion');
+            
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const index = parseInt(e.target.dataset.index);
+                    this.confirmDelete(index);
+                });
+            });
+        }
+
+        confirmDelete(index) {
+            const cotizaciones = this.getCotizaciones();
+            const cotizacion = cotizaciones[index];
+            
+            if (!cotizacion) return;
+
+            // Confirmación más amigable
+            const confirmed = confirm(
+                `¿Estás seguro de que quieres eliminar la cotización de "${cotizacion.nombre}"?\n\n` +
+                `Esta acción no se puede deshacer.`
+            );
+
+            if (confirmed) {
+                this.deleteCotizacion(index);
+            }
+        }
+
+        deleteCotizacion(index) {
+            try {
+                const cotizaciones = this.getCotizaciones();
+                const deleted = cotizaciones.splice(index, 1)[0];
+                
+                localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(cotizaciones));
+                this.displayCotizaciones();
+                
+                console.log('🗑️ Cotización eliminada:', deleted.nombre);
+                
+                // Mostrar notificación
+                this.showDeleteNotification(deleted.nombre);
+            } catch (error) {
+                console.error('❌ Error al eliminar cotización:', error);
+                alert('Error al eliminar la cotización. Por favor, intenta nuevamente.');
+            }
+        }
+
+        showDeleteNotification(nombre) {
+            const notification = document.createElement('div');
+            notification.className = 'delete-notification';
+            notification.innerHTML = `🗑️ Cotización de "${nombre}" eliminada`;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => notification.classList.add('show'), 100);
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, 2000);
+        }
+    }
+
+    // ===============================
+    // INICIALIZACIÓN DE LA APP
+    // ===============================
+    
+    // Verificar que los elementos críticos existan
+    if (!formElements.form && !lightboxElements.gallery) {
+        console.error('❌ No se encontraron elementos críticos de la aplicación');
+        return;
+    }
+
+    // Inicializar la aplicación
+    const app = new CotizadorApp();
+    
+    // Exponer la app globalmente para debugging (solo en desarrollo)
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        window.CotizadorApp = app;
+        console.log('🔧 Modo desarrollo: CotizadorApp disponible globalmente');
+    }
 });
 
 
