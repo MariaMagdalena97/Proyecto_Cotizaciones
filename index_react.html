@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estudio Prisma</title>
+    <style>
+        /* Reset y configuración base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        /* Títulos */
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 40px;
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #34495e;
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+            font-weight: 600;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        /* Galería de servicios */
+        .services-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .service-card {
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .service-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .service-card:hover img {
+            transform: scale(1.1);
+        }
+
+        .service-card .overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        /* Modal Lightbox */
+        .lightbox-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .lightbox-modal.active {
+            display: flex;
+        }
+
+        .lightbox-content {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            border-radius: 10px;
+            box-shadow: 0 0 50px rgba(255, 255, 255, 0.3);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 30px;
+            right: 50px;
+            color: white;
+            font-size: 40px;
+            cursor: pointer;
+            z-index: 1001;
+            transition: color 0.3s ease;
+        }
+
+        .close-btn:hover {
+            color: #3498db;
+        }
+
+        /* Formulario */
+        .form-section {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e6ed;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.5);
+            transition: background 0.3s ease;
+        }
+
+        .checkbox-item:hover {
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .submit-btn:hover {
+            background: linear-gradient(135deg, #2980b9 0%, #3498db 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
+        }
+
+        /* Lista de cotizaciones */
+        .quotes-section {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-radius: 15px;
+            padding: 30px;
+        }
+
+        .quote-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #e74c3c;
+        }
+
+        .quote-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .quote-number {
+            background: #e74c3c;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .quote-date {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .quote-services {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 10px 0;
+        }
+
+        .service-tag {
+            background: #3498db;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .delete-btn {
+            background: #e74c3c;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            background: #c0392b;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #f5c6cb;
+            margin-bottom: 20px;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #c3e6cb;
+            margin-bottom: 20px;
+        }
+
+        .no-quotes {
+            text-align: center;
+            color: #7f8c8d;
+            font-style: italic;
+            padding: 40px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .services-gallery {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 15px;
+            }
+
+            .service-card {
+                height: 150px;
+            }
+
+            .checkbox-group {
+                grid-template-columns: 1fr;
+            }
+
+            .quote-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Componente principal
+        function App() {
+            const [quotes, setQuotes] = useState([]);
+            const [lightboxOpen, setLightboxOpen] = useState(false);
+            const [currentImage, setCurrentImage] = useState('');
+            const [currentImageAlt, setCurrentImageAlt] = useState('');
+
+            // Cargar cotizaciones desde localStorage al iniciar
+            useEffect(() => {
+                const savedQuotes = JSON.parse(localStorage.getItem('quotes')) || [];
+                setQuotes(savedQuotes);
+            }, []);
+
+            // Guardar cotizaciones en localStorage cuando cambien
+            useEffect(() => {
+                localStorage.setItem('quotes', JSON.stringify(quotes));
+            }, [quotes]);
+
+            const openLightbox = (src, alt) => {
+                setCurrentImage(src);
+                setCurrentImageAlt(alt);
+                setLightboxOpen(true);
+            };
+
+            const closeLightbox = () => {
+                setLightboxOpen(false);
+            };
+
+            const addQuote = (quote) => {
+                const newQuote = {
+                    id: Date.now(),
+                    ...quote,
+                    date: new Date().toLocaleDateString('es-CL')
+                };
+                setQuotes([...quotes, newQuote]);
+            };
+
+            const deleteQuote = (id) => {
+                setQuotes(quotes.filter(quote => quote.id !== id));
+            };
+
+            return (
+                <div className="container">
+                    <h1>Estudio Prisma</h1>
+                    
+                    <ServicesGallery onImageClick={openLightbox} />
+                    <QuoteForm onSubmit={addQuote} />
+                    <QuotesList quotes={quotes} onDelete={deleteQuote} />
+                    
+                    <Lightbox 
+                        isOpen={lightboxOpen} 
+                        imageSrc={currentImage} 
+                        imageAlt={currentImageAlt} 
+                        onClose={closeLightbox} 
+                    />
+                </div>
+            );
+        }
+
+        // Componente de galería de servicios
+        function ServicesGallery({ onImageClick }) {
+            const services = [
+                {
+                    id: 1,
+                    title: "Diseño de Logotipo",
+                    image: "https://media.istockphoto.com/id/2040726024/photo/asian-graphic-designer-working-in-office-designing-logo-artist-creative-designer-illustrator.jpg?s=2048x2048&w=is&k=20&c=9eV3d-3Jauzi1t_0B_cJDBTgO2OdYZ0Pu7wK18AsfkY="
+                },
+                {
+                    id: 2,
+                    title: "Branding Corporativo",
+                    image: "https://media.istockphoto.com/id/2170938088/photo/team-collaborating-on-business-strategy-with-mindmap-and-goal-planning-in-a-modern-office.jpg?s=2048x2048&w=is&k=20&c=tdYtvidU49mu_WG9KYOloF-74iV0E9voe62GFkUIQrs="
+                },
+                {
+                    id: 3,
+                    title: "Diseño de Redes Sociales",
+                    image: "https://media.istockphoto.com/id/1499666574/photo/young-business-woman-watching-live-streaming-people-using-social-media-application-concept.jpg?s=2048x2048&w=is&k=20&c=V4AybvlWIsehqnaPn7q6yvYwWRXqy6fvt4a7AoL1OW4="
+                },
+                {
+                    id: 4,
+                    title: "Desarrollo Web",
+                    image: "https://media.istockphoto.com/id/1305999733/photo/web-design-desktop.jpg?s=2048x2048&w=is&k=20&c=GYbe4BRJgWZ4meMdGGbp2kB1qsYN5rWn5YwE0ZQHlWk="
+                },
+                {
+                    id: 5,
+                    title: "Video Promocional",
+                    image: "https://media.istockphoto.com/id/1356585971/photo/unrecognizable-guy-editing-astronaut-video.jpg?s=2048x2048&w=is&k=20&c=s8eaDtbYtu4f-2lFkN03tsFUDfh6Snm6S4Zbme7bJgE="
+                }
+            ];
+
+            return (
+                <div>
+                    <h2>Servicios que ofrecemos</h2>
+                    <div className="services-gallery">
+                        {services.map(service => (
+                            <ServiceCard 
+                                key={service.id} 
+                                service={service} 
+                                onClick={() => onImageClick(service.image, service.title)}
+                            />
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        // Componente de tarjeta de servicio
+        function ServiceCard({ service, onClick }) {
+            return (
+                <div className="service-card" onClick={onClick}>
+                    <img src={service.image} alt={service.title} />
+                    <div className="overlay">
+                        <span>{service.title}</span>
+                    </div>
+                </div>
+            );
+        }
+
+        // Componente de formulario de cotización
+        function QuoteForm({ onSubmit }) {
+            const [formData, setFormData] = useState({
+                name: '',
+                email: '',
+                services: [],
+                style: '',
+                comments: ''
+            });
+            const [errors, setErrors] = useState([]);
+            const [showSuccess, setShowSuccess] = useState(false);
+
+            const serviceOptions = [
+                'Diseño de Logotipo',
+                'Branding Corporativo',
+                'Diseño de Redes Sociales',
+                'Desarrollo Web',
+                'Video Promocional'
+            ];
+
+            const styleOptions = [
+                'Minimalista',
+                'Moderno',
+                'Clásico',
+                'Creativo',
+                'Corporativo'
+            ];
+
+            const handleInputChange = (e) => {
+                const { name, value } = e.target;
+                setFormData(prev => ({
+                    ...prev,
+                    [name]: value
+                }));
+            };
+
+            const handleServiceChange = (service) => {
+                setFormData(prev => ({
+                    ...prev,
+                    services: prev.services.includes(service)
+                        ? prev.services.filter(s => s !== service)
+                        : [...prev.services, service]
+                }));
+            };
+
+            const validateForm = () => {
+                const newErrors = [];
+                
+                if (!formData.name.trim() || formData.name.length < 3) {
+                    newErrors.push('El nombre debe tener al menos 3 caracteres');
+                }
+                
+                if (!formData.email.trim() || !formData.email.includes('@')) {
+                    newErrors.push('El email no es válido');
+                }
+                
+                if (formData.services.length === 0) {
+                    newErrors.push('Debe seleccionar al menos un servicio');
+                }
+                
+                if (!formData.style) {
+                    newErrors.push('Debe seleccionar un estilo');
+                }
+                
+                return newErrors;
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                const validationErrors = validateForm();
+                
+                if (validationErrors.length > 0) {
+                    setErrors(validationErrors);
+                    return;
+                }
+
+                onSubmit(formData);
+                setFormData({
+                    name: '',
+                    email: '',
+                    services: [],
+                    style: '',
+                    comments: ''
+                });
+                setErrors([]);
+                setShowSuccess(true);
+                
+                setTimeout(() => setShowSuccess(false), 3000);
+            };
+
+            return (
+                <div className="form-section">
+                    <h2>Cotiza con nosotros</h2>
+                    
+                    {showSuccess && (
+                        <div className="success-message">
+                            ¡Cotización enviada exitosamente!
+                        </div>
+                    )}
+                    
+                    {errors.length > 0 && (
+                        <div className="error-message">
+                            <ul>
+                                {errors.map((error, index) => (
+                                    <li key={index}>{error}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                    
+                    <form onSubmit={handleSubmit}>
+                        <div className="form-group">
+                            <label htmlFor="name">Nombre Completo:</label>
+                            <input
+                                type="text"
+                                id="name"
+                                name="name"
+                                value={formData.name}
+                                onChange={handleInputChange}
+                                required
+                            />
+                        </div>
+                        
+                        <div className="form-group">
+                            <label htmlFor="email">Email:</label>
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleInputChange}
+                                required
+                            />
+                        </div>
+                        
+                        <div className="form-group">
+                            <label>Servicios Deseados:</label>
+                            <div className="checkbox-group">
+                                {serviceOptions.map(service => (
+                                    <div key={service} className="checkbox-item">
+                                        <input
+                                            type="checkbox"
+                                            id={service}
+                                            checked={formData.services.includes(service)}
+                                            onChange={() => handleServiceChange(service)}
+                                        />
+                                        <label htmlFor={service}>{service}</label>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        
+                        <div className="form-group">
+                            <label htmlFor="style">Estilo Visual:</label>
+                            <select
+                                id="style"
+                                name="style"
+                                value={formData.style}
+                                onChange={handleInputChange}
+                                required
+                            >
+                                <option value="">Selecciona un estilo</option>
+                                {styleOptions.map(style => (
+                                    <option key={style} value={style}>{style}</option>
+                                ))}
+                            </select>
+                        </div>
+                        
+                        <div className="form-group">
+                            <label htmlFor="comments">Comentarios:</label>
+                            <textarea
+                                id="comments"
+                                name="comments"
+                                value={formData.comments}
+                                onChange={handleInputChange}
+                                rows="4"
+                                placeholder="Comentarios adicionales..."
+                            />
+                        </div>
+                        
+                        <button type="submit" className="submit-btn">
+                            Solicitar Cotización
+                        </button>
+                    </form>
+                </div>
+            );
+        }
+
+        // Componente de lista de cotizaciones
+        function QuotesList({ quotes, onDelete }) {
+            if (quotes.length === 0) {
+                return (
+                    <div className="quotes-section">
+                        <h2>Cotizaciones Registradas</h2>
+                        <div className="no-quotes">
+                            No hay cotizaciones registradas aún.
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="quotes-section">
+                    <h2>Cotizaciones Registradas</h2>
+                    {quotes.map((quote, index) => (
+                        <QuoteCard 
+                            key={quote.id} 
+                            quote={quote} 
+                            index={index + 1} 
+                            onDelete={onDelete}
+                        />
+                    ))}
+                </div>
+            );
+        }
+
+        // Componente de tarjeta de cotización
+        function QuoteCard({ quote, index, onDelete }) {
+            const handleDelete = () => {
+                if (window.confirm(`¿Estás seguro de eliminar la cotización de ${quote.name}?`)) {
+                    onDelete(quote.id);
+                }
+            };
+
+            return (
+                <div className="quote-card">
+                    <div className="quote-header">
+                        <span className="quote-number">#{index}</span>
+                        <span className="quote-date">{quote.date}</span>
+                    </div>
+                    
+                    <div className="quote-body">
+                        <p><strong>Cliente:</strong> {quote.name}</p>
+                        <p><strong>Email:</strong> {quote.email}</p>
+                        <p><strong>Estilo:</strong> {quote.style}</p>
+                        
+                        <div>
+                            <strong>Servicios:</strong>
+                            <div className="quote-services">
+                                {quote.services.map(service => (
+                                    <span key={service} className="service-tag">
+                                        {service}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                        
+                        {quote.comments && (
+                            <p><strong>Comentarios:</strong> {quote.comments}</p>
+                        )}
+                    </div>
+                    
+                    <button className="delete-btn" onClick={handleDelete}>
+                        Eliminar
+                    </button>
+                </div>
+            );
+        }
+
+        // Componente Lightbox
+        function Lightbox({ isOpen, imageSrc, imageAlt, onClose }) {
+            useEffect(() => {
+                const handleEscape = (e) => {
+                    if (e.key === 'Escape') {
+                        onClose();
+                    }
+                };
+
+                if (isOpen) {
+                    document.addEventListener('keydown', handleEscape);
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = 'auto';
+                }
+
+                return () => {
+                    document.removeEventListener('keydown', handleEscape);
+                    document.body.style.overflow = 'auto';
+                };
+            }, [isOpen, onClose]);
+
+            if (!isOpen) return null;
+
+            return (
+                <div className={`lightbox-modal ${isOpen ? 'active' : ''}`} onClick={onClose}>
+                    <span className="close-btn" onClick={onClose}>&times;</span>
+                    <img 
+                        className="lightbox-content" 
+                        src={imageSrc} 
+                        alt={imageAlt}
+                        onClick={(e) => e.stopPropagation()}
+                    />
+                </div>
+            );
+        }
+
+        // Renderizar la aplicación
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
